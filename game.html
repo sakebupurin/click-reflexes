@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反射神経測定ゲーム</title>
+    <style>
+        body {
+            text-align: center;
+            margin: 0;
+            background-color: #deeaed;
+            background-image: url(okumono_usagi2528.png);
+            background-size: 100% 100%;
+        }
+
+        #game-area {
+            width: 500px;
+            height: 400px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border: 3px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #target {
+            width: 50px;
+            height: 50px;
+            background-color: #ff5722;
+            background-image: url(pudding_plane.png);
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            position: absolute;
+            display: none;
+            cursor: pointer;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 50px;
+            background-color: rgb(167, 233, 233);
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: rgb(188, 236, 236);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <h1>反射神経測定ゲーム</h1>
+    <p>スタートを押して出た画像を素早くクリックしてください！（５回挑戦）<br>
+    0.4秒以下は超人！</p>
+    <button id="start-btn">スタート</button>
+    <div id="game-area">
+        <div id="target"></div>
+    </div>
+    <h2 id="result">結果： - 秒</h2>
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const gameArea = document.getElementById('game-area');
+        const target = document.getElementById('target');
+        const resultText = document.getElementById('result');
+
+        let startTime;
+        let count = 0;
+        let totalTime = 0;
+        let maxCount = 5;
+
+        startBtn.addEventListener('click', () => {
+            count = 0;
+            totalTime = 0;
+            startBtn.disabled = true;
+            resultText.textContent = "準備中…";
+            showTargetWithDelay();
+        });
+
+        function showTargetWithDelay() {
+            const randomDelay = Math.random() * 1500 + 500;
+
+            setTimeout(() => {
+                moveTargetToRandomPosition();
+                target.style.display = 'block';
+                startTime = performance.now();
+            }, randomDelay);
+        }
+
+        function moveTargetToRandomPosition() {
+            const maxX = gameArea.clientWidth - 50;
+            const maxY = gameArea.clientHeight - 50;
+
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+
+            const randomSize = Math.floor(Math.random() * 40) + 30;
+
+            target.style.left = randomX + 'px';
+            target.style.top = randomY + 'px';
+
+            target.style.width = randomSize + 'px';
+            target.style.height = randomSize + 'px';
+        }
+
+        target.addEventListener('click', () => {
+            const endTime = performance.now();
+            const reactionTime = (endTime - startTime) / 1000;
+
+            totalTime += reactionTime;
+            count++;
+
+            target.style.display = 'none';
+
+            if (count < maxCount) {
+                resultText.textContent = `${count}回目： ${reactionTime.toFixed(3)} 秒`;
+                showTargetWithDelay();
+            } else {
+                const averageTime = totalTime / maxCount;
+                let rank = "";
+                if (averageTime <= 0.4) {
+                    rank = "超人的な速さ！";
+                } else if (averageTime <= 0.5) {
+                    rank = "とても速いです！";
+                } else if (averageTime <= 0.7) {
+                    rank = "速いです！";
+                } else {
+                    rank = "標準的です！";
+                }
+
+                resultText.textContent = `終了！平均：${averageTime.toFixed(3)} 秒 【ランク：${rank}】`;
+
+                startBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
